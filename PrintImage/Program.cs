@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.IO;
 using BarcodeLib;
 
 namespace PrintPage
@@ -9,6 +10,7 @@ namespace PrintPage
     public class PrintCodeBar
     {
         static string plate;
+        MemoryStream memoryStream;
 
         public PrintCodeBar()
         {
@@ -34,6 +36,7 @@ namespace PrintPage
 
         private void GenerateCodeBar()
         {
+            memoryStream = new MemoryStream();
             Barcode barcode = new Barcode
             {
                 IncludeLabel = true,
@@ -43,16 +46,16 @@ namespace PrintPage
 
             barcode.Encode(TYPE.CODE128, plate, Color.Black, Color.White, 200, 100);
 
-            barcode.SaveImage(@"C:\CapturarFotoWebCam\" + plate + ".jpg", SaveTypes.JPG);
+            barcode.SaveImage(memoryStream, SaveTypes.JPG);
         }
 
         private void Document_PrintPage(object sender, PrintPageEventArgs e)
         {
-            Image image = Image.FromFile(@"C:\CapturarFotoWebCam\" + plate + ".jpg");
-            Point point = new Point(100, 100);
+            Image image = Image.FromStream(memoryStream);
+            Point point = new Point(0, 20);
+            e.Graphics.DrawString(DateTime.Now.ToShortTimeString(), new Font("calibry", 10f), Brushes.Black, (float)0, 0f);
             e.Graphics.DrawImage(image, point);
         }
-
 
         public static void Main(string[] args)
         {
